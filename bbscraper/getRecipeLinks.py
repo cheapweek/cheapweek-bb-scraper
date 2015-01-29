@@ -37,7 +37,7 @@ def getRecipesFromBBURL(url):
 
         for recipe in divs:
             rec_data = []
-            rec_divs = recipe.find_all(["div", "h2"])
+            rec_divs = recipe.find_all("div")
             for rec_div in rec_divs:
                 if rec_div.get('class')[0] == 'recipe-cost':
                     #print rec_div.contents
@@ -45,17 +45,22 @@ def getRecipesFromBBURL(url):
                         rec_data.insert(0,False)
                     else:
                         rec_data.insert(0,True)
-                if rec_div.get('class')[0] == 'entry-title':
+                if rec_div.get('class')[0] == 'entry-content':
                     #print rec_div.a.get('href')
-                    rec_data.insert(1,rec_div.a.get('href'))
+                    try:
+                        rec_data.insert(1,rec_div.a.get('href'))
+                        rec_data.insert(2,rec_div.a.img.get('src'))
+                    except:
+                        rec_data.insert(1,'')
+                        rec_data.insert(2,'')
+                        pass
             if rec_data[0]:
-                recipeLinks.append(rec_data[1])
+                recipeLinks.append(', '.join([rec_data[1],rec_data[2]]))
         return recipeLinks
     except:
         print "Something broke"
         print url
-        print divs
-
+        print rec_div
 
 #getRecipesFromBBURL('http://www.budgetbytes.com/2009/05')
 fo = open('./output.txt','wb')
@@ -65,4 +70,3 @@ for u in generateUrls(listOfYearMonths(STARTYEAR,STARTMONTH,ENDYEAR,ENDMONTH), '
     print listForThisUrl
 fo.write('\n'.join(listOfBBUrls))
 fo.close()
-
