@@ -62,7 +62,6 @@ def getRecipesFromBBURL(url):
         print url
         print rec_div
 
-#getRecipesFromBBURL('http://www.budgetbytes.com/2009/05')
 fo = open('./output.txt','wb')
 for u in generateUrls(listOfYearMonths(STARTYEAR,STARTMONTH,ENDYEAR,ENDMONTH), 'http://www.budgetbytes.com'):
     listForThisUrl = getRecipesFromBBURL(u)
