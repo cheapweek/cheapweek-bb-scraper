@@ -1,7 +1,6 @@
 import time
 import urllib
 import re
-import collections
 from bs4 import BeautifulSoup
 
 STARTYEAR = 2009
@@ -24,25 +23,29 @@ def listOfUrls(yrmo,url_stub,_format = '{}/{}/{:0>2d}'):
             print i,
             print _format.format(url_stub,yr[0],mo)
 
-def getRecipesFromBBURL(url, )
-    data = urllib.urlopen(url).read()
-    reg = 'post-\d\d\d\d\d'
-    #class="post-##### post
-    #class id="content"
-    links = collections.defaultdict(list)
+def getRecipesFromBBURL(url):
+    html_data = urllib.urlopen(url).read()
+    regex = 'post-\d\d\d\d\d'
+    recipeLinks = []
+
+    soup = BeautifulSoup(html_data)
+
+    content = soup.find(id="content")
+
+    divs = content.find_all(class_=re.compile(regex))
+    for recipe in divs:
+        _RECIPE_ = True
+        rec_divs = recipe.find_all("div")
+        for rec_div in rec_divs:
+            if rec_div.get('class')[0] == 'recipe-cost':
+                #print rec_div.contents
+                if not rec_div.contents:
+                    _RECIPE_ = False
+            if rec_div.get('class')[0] == 'entry-content':
+                #print rec_div.a.get('href')
+                if _RECIPE_:
+                    recipeLinks.append(rec_div.a.get('href'))
+    return recipeLinks
 
 
-    soup = BeautifulSoup(data)
-
-    rec = soup.find(id="content")
-
-    divs = rec.find_all(class_=re.compile('post-\d\d\d\d\d'))
-    for m,k in enumerate(divs):
-        #print "POST %s => " % (m)
-        #print ""
-        #print k.get('class')
-        r = k.find_all("div")
-        for a,j in enumerate(r):
-            if j.get('class')[0] == 'entry-content':
-                print j.a.get('href')
-                print "___________________________________"
+print getRecipesFromBBURL('http://budgetbytes.com/2014/12')
