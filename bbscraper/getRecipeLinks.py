@@ -8,20 +8,20 @@ ENDYEAR = 2015
 STARTMONTH = 5
 ENDMONTH = int(time.strftime("%m"))
 
-def ListOfYearMonths(startyear,startmonth,endyear,endmonth):
+def listOfYearMonths(startyear,startmonth,endyear,endmonth):
 
 	moyr = map(lambda x: [x,range(1,13)],range(startyear,endyear+1))
 	moyr[0][1] = moyr[0][1][startmonth-1:]
 	moyr[-1][1] = moyr[-1][1][0:endmonth]
 	return moyr
 
-def listOfUrls(yrmo,url_stub,_format = '{}/{}/{:0>2d}'):
+def generateUrls(yrmo,url_stub,_format = '{}/{}/{:0>2d}'):
     #return a formatted list of urls
     #yrmo is a datastructure with the format [[yr, [mo,mo,...]],[yr, [mo, mo, ...], ...]
     for yr in yrmo:
-        for i,mo in enumerate(yr[1]):
-            print i,
-            print _format.format(url_stub,yr[0],mo)
+        for mo in yr[1]:
+            yield _format.format(url_stub,yr[0],mo)
+
 
 def getRecipesFromBBURL(url):
     html_data = urllib.urlopen(url).read()
@@ -48,4 +48,7 @@ def getRecipesFromBBURL(url):
     return recipeLinks
 
 
-print getRecipesFromBBURL('http://budgetbytes.com/2014/12')
+for u in generateUrls(listOfYearMonths(STARTYEAR,STARTMONTH,ENDYEAR,ENDMONTH), 'http://www.budgetbytes.com'):
+    print u
+
+#print getRecipesFromBBURL('http://budgetbytes.com/2014/12')
