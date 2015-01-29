@@ -5,8 +5,9 @@ from bs4 import BeautifulSoup
 
 STARTYEAR = 2009
 ENDYEAR = 2015
-STARTMONTH = 5
+STARTMONTH = 12
 ENDMONTH = int(time.strftime("%m"))
+listOfBBUrls = []
 
 def listOfYearMonths(startyear,startmonth,endyear,endmonth):
 
@@ -24,31 +25,44 @@ def generateUrls(yrmo,url_stub,_format = '{}/{}/{:0>2d}'):
 
 
 def getRecipesFromBBURL(url):
-    html_data = urllib.urlopen(url).read()
-    regex = 'post-\d\d\d\d\d'
-    recipeLinks = []
+    try:
+        html_data = urllib.urlopen(url).read()
+        regex = 'post-\d\d\d\d\d'
+        recipeLinks = []
 
-    soup = BeautifulSoup(html_data)
+        soup = BeautifulSoup(html_data)
 
-    content = soup.find(id="content")
+        content = soup.find(id="content")
+        divs = content.find_all(class_=re.compile(regex))
 
-    divs = content.find_all(class_=re.compile(regex))
-    for recipe in divs:
-        _RECIPE_ = True
-        rec_divs = recipe.find_all("div")
-        for rec_div in rec_divs:
-            if rec_div.get('class')[0] == 'recipe-cost':
-                #print rec_div.contents
-                if not rec_div.contents:
-                    _RECIPE_ = False
-            if rec_div.get('class')[0] == 'entry-content':
-                #print rec_div.a.get('href')
-                if _RECIPE_:
-                    recipeLinks.append(rec_div.a.get('href'))
-    return recipeLinks
+        for recipe in divs:
+            rec_data = []
+            rec_divs = recipe.find_all(["div", "h2"])
+            for rec_div in rec_divs:
+                if rec_div.get('class')[0] == 'recipe-cost':
+                    #print rec_div.contents
+                    if not rec_div.contents:
+                        rec_data.insert(0,False)
+                    else:
+                        rec_data.insert(0,True)
+                if rec_div.get('class')[0] == 'entry-title':
+                    #print rec_div.a.get('href')
+                    rec_data.insert(1,rec_div.a.get('href'))
+            if rec_data[0]:
+                recipeLinks.append(rec_data[1])
+        return recipeLinks
+    except:
+        print "Something broke"
+        print url
+        print divs
 
 
+#getRecipesFromBBURL('http://www.budgetbytes.com/2009/05')
+fo = open('./output.txt','wb')
 for u in generateUrls(listOfYearMonths(STARTYEAR,STARTMONTH,ENDYEAR,ENDMONTH), 'http://www.budgetbytes.com'):
-    print u
+    listForThisUrl = getRecipesFromBBURL(u)
+    listOfBBUrls += listForThisUrl
+    print listForThisUrl
+fo.write('\n'.join(listOfBBUrls))
+fo.close()
 
-#print getRecipesFromBBURL('http://budgetbytes.com/2014/12')
